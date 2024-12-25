@@ -43,6 +43,9 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
+import java.nio.file.Files;
+import java.nio.file.Paths;
+import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -174,6 +177,7 @@ public class MainActivity extends AppCompatActivity {
 
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
+
 
     }
 
@@ -313,6 +317,37 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    private void fetchPlant(String urlString) {
+        ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+        executorService.execute(() -> {
+            try {
+                // Path to the image file
+                String imagePath = "../../res/drawable/plant_1.png";
+
+                // Read the file as bytes
+                @SuppressLint({"NewApi", "LocalSuppress"}) byte[] fileContent = Files.readAllBytes(Paths.get(imagePath));
+
+                // Encode to Base64
+                @SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(fileContent);
+
+                System.out.println(base64String);
+
+
+
+                    // Optionally update UI
+                    runOnUiThread(() -> {
+
+                    });
+
+
+
+            } catch (Exception e) {
+                Log.e(TAG, "Error fetching JSON", e);
+            }
+        });
+    }
+
     private void fetchJson(String urlString) {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
@@ -324,8 +359,9 @@ public class MainActivity extends AppCompatActivity {
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Accept", "application/json");
 
-                // Check response code
+                // Check r esponse code
                 int responseCode = connection.getResponseCode();
+
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder response = new StringBuilder();
