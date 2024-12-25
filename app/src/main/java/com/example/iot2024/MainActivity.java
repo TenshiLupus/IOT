@@ -4,7 +4,12 @@ import static com.example.iot2024.LocationService.ACTION_START_LOCATION_SERVICE;
 
 import android.annotation.SuppressLint;
 
+import android.content.Context;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
@@ -13,6 +18,7 @@ import android.widget.Switch;
 import android.widget.TextView;
 import android.Manifest;
 import android.widget.Toast;
+import android.net.Uri;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -30,6 +36,8 @@ import org.eclipse.paho.client.mqttv3.MqttCallbackExtended;
 import org.eclipse.paho.client.mqttv3.MqttClient;
 import org.eclipse.paho.client.mqttv3.MqttException;
 import org.eclipse.paho.client.mqttv3.MqttMessage;
+import org.json.JSONArray;
+import org.json.JSONObject;
 
 import com.google.android.gms.location.FusedLocationProviderClient;
 
@@ -38,6 +46,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -45,6 +54,7 @@ import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -52,6 +62,11 @@ import java.util.concurrent.Executors;
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;
 import ch.ethz.ssh2.StreamGobbler;
+import okhttp3.MediaType;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
+import okhttp3.RequestBody;
+import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -177,8 +192,8 @@ public class MainActivity extends AppCompatActivity {
 
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
-
-
+        String imagePath = "../../../../res/drawable/plant_1.png";
+        fetchPlant();
     }
 
     private void requestLocationPermission() {
@@ -317,23 +332,43 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private void fetchPlant(String urlString) {
+    private String getURLForResource (int resourceId) {
+        //use BuildConfig.APPLICATION_ID instead of R.class.getPackage().getName() if both are not same
+        return Uri.parse("android.resource://"+R.class.getPackage().getName()+"/" +resourceId).toString();
+    }
+
+    private void fetchPlant() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         executorService.execute(() -> {
             try {
-                // Path to the image file
-                String imagePath = "../../res/drawable/plant_1.png";
+
+                byte[] imageBytes = convertDrawableToByteArray(this, R.drawable.plant_1);
 
                 // Read the file as bytes
-                @SuppressLint({"NewApi", "LocalSuppress"}) byte[] fileContent = Files.readAllBytes(Paths.get(imagePath));
 
+                Log.d("ANGEL PLANT CONTENT", "IS THIS LOGGING?" + imageBytes.length);
                 // Encode to Base64
-                @SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(fileContent);
+                @SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(imageBytes);
 
-                System.out.println(base64String);
+                Log.d("ANGEL PLANT", base64String);
 
+                OkHttpClient client = new OkHttpClient().newBuilder().build();
 
+                JSONObject json = new JSONObject();
+                JSONArray images = new JSONArray();
+                images.put("data:image/jpg;base64," + base64String);
+                json.put("images", images);
+                String jsonPayload = json.toString();
+
+                Request request = new Request.Builder()
+                        .url("https://plant.id/api/v3/identification?details=common_names,url,description,taxonomy,rank,gbif_id,inaturalist_id,image,synonyms,edible_parts,watering,best_light_condition,best_soil_type,common_uses,cultural_significance,toxicity,best_watering")
+                        .post(RequestBody.create(MediaType.parse("application/json"),jsonPayload))
+                        .addHeader("Api-Key", "Cy4H05QHgexHDMevHwcyaVscBPfvXXj1lEnhDwhl2ak7c1EEmN")
+                        .addHeader("Content-Type", "application/json")
+                        .build();
+                Response response = client.newCall(request).execute();
+                Log.d("ANGEL PLANT RESPONSE", " " + response.body().string());
 
                     // Optionally update UI
                     runOnUiThread(() -> {
@@ -394,6 +429,20 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Error fetching JSON", e);
             }
         });
+    }
+
+    private byte[] convertDrawableToByteArray(Context context, int drawableId) {
+        // Load the image as a Bitmap
+        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), drawableId);
+
+        // Create a ByteArrayOutputStream
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+
+        // Compress the Bitmap into the ByteArrayOutputStream (e.g., PNG format)
+        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
+
+        // Convert the ByteArrayOutputStream into a byte array
+        return byteArrayOutputStream.toByteArray();
     }
 }
 
