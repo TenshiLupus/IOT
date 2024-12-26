@@ -42,6 +42,7 @@ import org.json.JSONObject;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 import com.google.android.gms.location.LocationServices;
+import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
@@ -193,7 +194,7 @@ public class MainActivity extends AppCompatActivity {
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
         String imagePath = "../../../../res/drawable/plant_1.png";
-        fetchPlant();
+        //fetchPlant();
     }
 
     private void requestLocationPermission() {
@@ -368,11 +369,32 @@ public class MainActivity extends AppCompatActivity {
                         .addHeader("Content-Type", "application/json")
                         .build();
                 Response response = client.newCall(request).execute();
-                Log.d("ANGEL PLANT RESPONSE", " " + response.body().string());
+                String plantidResponse = response.body().string();
+                Log.d("ANGEL PLANT RESPONSE", plantidResponse);
 
                     // Optionally update UI
                     runOnUiThread(() -> {
+                        JsonObject jsonObject = null;
+                        try {
+                            Log.d("ANGEL", "PARSING RESPONSE");
+                            jsonObject = JsonParser.parseString(plantidResponse).getAsJsonObject();
+                            Log.d("ANGEL", "PARSED OBJECT FROM PLANT RESPONSE");
 
+
+                            JsonArray ja = jsonObject.getAsJsonObject("result").getAsJsonObject("classification").getAsJsonArray("suggestions");
+                            JsonObject mlp = ja.get(0).getAsJsonObject();
+                            JsonObject plantDetails = mlp.getAsJsonObject("details");
+
+                            String description = plantDetails.getAsJsonObject("description").get("Value").getAsString();
+                            String soil = plantDetails.get("best_light_condition").getAsString();
+                            String light = plantDetails.get("best_soil_type").getAsString();
+                            String watering = plantDetails.get("best_watering").getAsString();
+
+                            System.out.println();
+                            Log.d("ANGEL FIRST PLANT", "PASSED GETTING OBJECTS");
+                        } catch (Exception e) {
+                            Log.e("ANGEL", "error with IO", e);
+                        }
                     });
 
 
