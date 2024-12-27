@@ -5,6 +5,7 @@ import static com.example.iot2024.LocationService.ACTION_START_LOCATION_SERVICE;
 import android.annotation.SuppressLint;
 
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -13,6 +14,7 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
+import android.view.View;
 import android.widget.CompoundButton;
 import android.widget.ImageView;
 import android.widget.Switch;
@@ -20,6 +22,7 @@ import android.widget.TextView;
 import android.Manifest;
 import android.widget.Toast;
 import android.net.Uri;
+import android.widget.Button;
 
 import androidx.activity.EdgeToEdge;
 import androidx.annotation.NonNull;
@@ -118,7 +121,17 @@ public class MainActivity extends AppCompatActivity {
         lv = findViewById(R.id.lumen_value);
         tv = findViewById(R.id.temp_value);
         qv = findViewById(R.id.info);
+        Button switchButton = findViewById(R.id.chartButton);
 
+
+        switchButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create an Intent to start SecondActivity
+                Intent intent = new Intent(MainActivity.this, LineChartView.class);
+                startActivity(intent);
+            }
+        });
 
         lightToggle.setOnCheckedChangeListener(
                 new CompoundButton.OnCheckedChangeListener() {
