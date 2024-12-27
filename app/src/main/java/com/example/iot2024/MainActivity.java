@@ -14,6 +14,7 @@ import android.os.Bundle;
 import android.os.StrictMode;
 import android.util.Log;
 import android.widget.CompoundButton;
+import android.widget.ImageView;
 import android.widget.Switch;
 import android.widget.TextView;
 import android.Manifest;
@@ -75,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView mv;
     private TextView lv;
     private TextView tv;
+    private ImageView qv;
 
     private double longitude;
     private double latitude;
@@ -87,8 +89,10 @@ public class MainActivity extends AppCompatActivity {
 
     private FusedLocationProviderClient fusedLocationProviderClient;
 
-    private LocationService ls;
-
+    private String description;
+    private String soil;
+    private String light;
+    private String watering;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -113,7 +117,7 @@ public class MainActivity extends AppCompatActivity {
         mv = findViewById(R.id.moisture_value);
         lv = findViewById(R.id.lumen_value);
         tv = findViewById(R.id.temp_value);
-
+        qv = findViewById(R.id.info);
 
 
         lightToggle.setOnCheckedChangeListener(
@@ -193,8 +197,11 @@ public class MainActivity extends AppCompatActivity {
 
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
-        String imagePath = "../../../../res/drawable/plant_1.png";
-        //fetchPlant();
+        fetchPlant();
+
+
+
+
     }
 
     private void requestLocationPermission() {
@@ -385,13 +392,32 @@ public class MainActivity extends AppCompatActivity {
                             JsonObject mlp = ja.get(0).getAsJsonObject();
                             JsonObject plantDetails = mlp.getAsJsonObject("details");
 
-                            String description = plantDetails.getAsJsonObject("description").get("Value").getAsString();
-                            String soil = plantDetails.get("best_light_condition").getAsString();
-                            String light = plantDetails.get("best_soil_type").getAsString();
-                            String watering = plantDetails.get("best_watering").getAsString();
+                            description = plantDetails.getAsJsonObject("description").get("value").getAsString();
+                            soil = plantDetails.get("best_light_condition").getAsString();
+                            light = plantDetails.get("best_soil_type").getAsString();
+                            watering = plantDetails.get("best_watering").getAsString();
 
-                            System.out.println();
-                            Log.d("ANGEL FIRST PLANT", "PASSED GETTING OBJECTS");
+                            DetailFragment bottomSheetDialog = new DetailFragment();
+
+                            Bundle args = new Bundle();
+                            args.putString("description", description);
+                            args.putString("soil", soil);
+                            args.putString("light", light);
+                            args.putString("watering", watering);
+                            bottomSheetDialog.setArguments(args);
+
+                            qv.setOnClickListener((e) -> {
+                                bottomSheetDialog.show(getSupportFragmentManager(), "Details");
+                            });
+
+
+
+
+
+                            System.out.println(description +"\n\n" + soil + "\n\n" + light + "\n\n" + watering + "\n\n");
+
+
+
                         } catch (Exception e) {
                             Log.e("ANGEL", "error with IO", e);
                         }
