@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "357628845072",
+    "firebase_url": "https://iotproject-38fac-default-rtdb.europe-west1.firebasedatabase.app",
+    "project_id": "iotproject-38fac",
+    "storage_bucket": "iotproject-38fac.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:357628845072:android:1ffbd0399782c97fe1be95",
+        "android_client_info": {
+          "package_name": "com.example.iot2024"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCabis8LHzh80TUoh01kN_hpbztl8adgGE"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

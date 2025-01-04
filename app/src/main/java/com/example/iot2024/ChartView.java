@@ -23,6 +23,9 @@ public class ChartView extends View {
     }
 
     private void init() {
+
+        //48:ee:0c:f2:c9:13
+
         // Paint for the grid lines
         gridPaint = new Paint();
         gridPaint.setColor(Color.LTGRAY);

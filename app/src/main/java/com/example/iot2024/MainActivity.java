@@ -46,6 +46,7 @@ import org.json.JSONObject;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 import com.google.android.gms.location.LocationServices;
+import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
@@ -97,6 +98,7 @@ public class MainActivity extends AppCompatActivity {
     private String light;
     private String watering;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -108,6 +110,7 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Log.d("ANGEL LOCATION","" + fusedLocationProviderClient);
@@ -210,7 +213,7 @@ public class MainActivity extends AppCompatActivity {
 
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
-        fetchPlant();
+        //fetchPlant();
 
 
 
