@@ -9,6 +9,7 @@ pluginManagement {
         }
         mavenCentral()
         gradlePluginPortal()
+
     }
 }
 dependencyResolutionManagement {
@@ -18,6 +19,9 @@ dependencyResolutionManagement {
         mavenCentral()
         maven {
             url = uri("https://repo.eclipse.org/content/repositories/paho-snapshots/")
+        }
+        maven {
+            url = uri("https://jitpack.io/")
         }
     }
 }

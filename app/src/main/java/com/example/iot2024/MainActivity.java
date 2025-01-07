@@ -43,9 +43,14 @@ import org.eclipse.paho.client.mqttv3.MqttMessage;
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.android.gms.auth.api.signin.GoogleSignIn;
+import com.google.android.gms.auth.api.signin.GoogleSignInAccount;
+import com.google.android.gms.auth.api.signin.GoogleSignInClient;
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions;
 import com.google.android.gms.location.FusedLocationProviderClient;
 
 import com.google.android.gms.location.LocationServices;
+import com.google.android.libraries.identity.googleid.GetGoogleIdOption;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
@@ -76,6 +81,7 @@ import okhttp3.Response;
 
 public class MainActivity extends AppCompatActivity {
 
+    private static final String WEB_CLIENT_ID = "357628845072-aia2a6hbtln777dfl9bmc5oatb7bpbo1.apps.googleusercontent.com";
     private String weather_api_response = "";
     private TextView mv;
     private TextView lv;
@@ -98,6 +104,8 @@ public class MainActivity extends AppCompatActivity {
     private String light;
     private String watering;
 
+    GoogleSignInOptions gso;
+    GoogleSignInClient gsc;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -111,6 +119,10 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        GetGoogleIdOption googleIdOption  = new GetGoogleIdOption.Builder()
+                .setFilterByAuthorizedAccounts(true)
+                .setServerClientId(WEB_CLIENT_ID)
+                .setAutoSelectEnabled(true).build();
 
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Log.d("ANGEL LOCATION","" + fusedLocationProviderClient);
@@ -125,6 +137,17 @@ public class MainActivity extends AppCompatActivity {
         tv = findViewById(R.id.temp_value);
         qv = findViewById(R.id.info);
         Button switchButton = findViewById(R.id.chartButton);
+
+        gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
+        gsc = GoogleSignIn.getClient(this,gso);
+
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if(acct!=null){
+            String personName = acct.getDisplayName();
+            String personEmail = acct.getEmail();
+            Log.d("ANGEL", personName);
+            Log.d("ANGEL", personEmail);
+        }
 
 
         switchButton.setOnClickListener(new View.OnClickListener() {
