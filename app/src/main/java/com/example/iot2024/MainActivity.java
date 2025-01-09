@@ -149,12 +149,11 @@ public class MainActivity extends AppCompatActivity {
             Log.d("ANGEL", personEmail);
         }
 
-
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Create an Intent to start SecondActivity
-                Intent intent = new Intent(MainActivity.this, LineChartView.class);
+                Intent intent = new Intent(MainActivity.this, ChartActivity.class);
                 startActivity(intent);
             }
         });
@@ -207,7 +206,12 @@ public class MainActivity extends AppCompatActivity {
 
                 switch(topic) {
                     case "luxv":
+                        double value = Double.parseDouble(newMessage);
 
+                        if(value < 15.0){
+                            run("tdtool --on 1");
+                        }
+                        else run("tdtool --off 1");
                         lv.setText(newMessage);
 
                         break;
@@ -481,7 +485,7 @@ public class MainActivity extends AppCompatActivity {
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Accept", "application/json");
 
-                // Check r esponse code
+                // Check response code
                 int responseCode = connection.getResponseCode();
 
                 if (responseCode == HttpURLConnection.HTTP_OK) {
@@ -531,5 +535,7 @@ public class MainActivity extends AppCompatActivity {
         // Convert the ByteArrayOutputStream into a byte array
         return byteArrayOutputStream.toByteArray();
     }
+
+
 }
 
