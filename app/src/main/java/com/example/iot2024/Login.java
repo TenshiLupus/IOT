@@ -74,7 +74,7 @@ public class Login extends AppCompatActivity {
     }
     void navigateToSecondActivity(){
         finish();
-        Intent intent = new Intent(Login.this, MainActivity.class);
+        Intent intent = new Intent(Login.this, PlantListActivity.class);
         startActivity(intent);
     }
 }

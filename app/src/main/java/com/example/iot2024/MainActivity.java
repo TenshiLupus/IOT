@@ -92,8 +92,11 @@ public class MainActivity extends AppCompatActivity {
     private double latitude;
     private Switch lightToggle = null;
     private MqttAndroidClient client;
-    private static final String SERVER_URI = "tcp://broker.hivemq.com:1883";
+    //private static final String SERVER_URI = "tcp://broker.hivemq.com:1883";
+    private static final String SERVER_URI = "tcp://test.mosquitto.org:1883";
     private static final String TAG = "MOBILEAPPLICATION";
+
+
 
     private static final int REQUEST_CODE_LOCATION_PERMISSION = 100;
 
@@ -103,6 +106,15 @@ public class MainActivity extends AppCompatActivity {
     private String soil;
     private String light;
     private String watering;
+    private String userid = "";
+
+    private String hostname;
+    private String username = "iot";
+    private String password = "iot2024";
+
+    private String image;
+
+    private String mac;
 
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
@@ -118,6 +130,13 @@ public class MainActivity extends AppCompatActivity {
             v.setPadding(systemBars.left, systemBars.top, systemBars.right, systemBars.bottom);
             return insets;
         });
+
+        Intent intent = getIntent();
+
+        // Extract the string extra using the key
+        hostname = intent.getStringExtra("deviceip");
+        image= intent.getStringExtra("image");
+        mac = intent.getStringExtra("mac");
 
         GetGoogleIdOption googleIdOption  = new GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)
@@ -141,12 +160,16 @@ public class MainActivity extends AppCompatActivity {
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         gsc = GoogleSignIn.getClient(this,gso);
 
+
+
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if(acct!=null){
+            userid = acct.getId();
             String personName = acct.getDisplayName();
             String personEmail = acct.getEmail();
             Log.d("ANGEL", personName);
             Log.d("ANGEL", personEmail);
+
         }
 
         switchButton.setOnClickListener(new View.OnClickListener() {
@@ -186,13 +209,14 @@ public class MainActivity extends AppCompatActivity {
                 if (reconnect) {
                     System.out.println("Reconnected to : " + serverURI);
                     // Re-subscribe as we lost it due to new session
-                    subscribe("moistv");
-                    subscribe("luxv");
+                    subscribe(mac + "/moistv");
+                    subscribe(mac + "/luxv");
+
                 } else {
                     Log.d("CONNECTION ANGEL", "IS THS WORKING?");
                     System.out.println("Connected to: " + serverURI);
-                    subscribe("moistv");
-                    subscribe("luxv");
+                    subscribe(mac + "/moistv");
+                    subscribe(mac + "/luxv");
                 }
             }
             @Override
@@ -202,26 +226,31 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 String newMessage = new String(message.getPayload());
-                System.out.println("Incoming message: " + newMessage);
+                Log.d("ANGEL","Incoming message: " + newMessage + " Topic: " + topic);
+                topic = topic.substring(mac.length() + 1);
+                Log.d("ANGEL", "TOPIC VALUE RECIEVED" + topic);
+                Log.d("ANGEL", "EVALUATING TOPIC VALUES");
+                try {
 
-                switch(topic) {
-                    case "luxv":
-                        double value = Double.parseDouble(newMessage);
+                    switch (topic) {
+                        case "luxv":
+                            double value = Double.parseDouble(newMessage);
+                            Log.d("ANGEL", "EVALUATING LUXV");
+                            if (value < 15.0) {
+                                Log.d("ANGEL", "TURNING ON LIGHT");
+                                run("tdtool --on 1");
+                            } else run("tdtool --off 1");
 
-                        if(value < 15.0){
-                            run("tdtool --on 1");
-                        }
-                        else run("tdtool --off 1");
-                        lv.setText(newMessage);
+                            lv.setText(String.format("%.2f" + " %", value));
 
-                        break;
-                    case "moistv":
+                            break;
+                        case "moistv":
+                            Log.d("ANGEL", "EVALUATING MOISTV");
+                            mv.setText(newMessage +" %");
+                            break;
 
-                        mv.setText(newMessage);
-                        break;
-
-                }
-
+                    }
+                    Log.d("ANGEL", "PASSED TOPIC READING");
                 /*
                 String weatherApiUrl = "https://api.tomorrow.io/v4/weather/forecast?location=42.3478,-71.0466&apikey=tIZjAylkQoHd5kF2mxZnAvJnxTyekszv";
                 fetchJson(weatherApiUrl);
@@ -229,7 +258,9 @@ public class MainActivity extends AppCompatActivity {
                 JsonObject timelines = jsonObject.getAsJsonObject("timelines");
                 Log.d("ANGEL temp","" + timelines.getAsJsonObject("minutely"));
                 */
-
+                }catch (Exception e){
+                    e.printStackTrace();
+                }
 
             }
             @Override
@@ -297,7 +328,8 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void run (String command) {
-        String hostname = "192.168.1.120";
+        Log.d("Angel", "RUNNING SSH COMMAND");
+        Log.d("Angel", "NAME OF HOST: " + hostname);
         String username = "iot";
         String password = "iot2024";
         try
@@ -346,7 +378,7 @@ public class MainActivity extends AppCompatActivity {
                 // We are connected
                     Log.d(TAG, "onSuccess");
                     System.out.println(TAG + " Success. Connected to " + SERVER_URI);
-
+                    publish("plinplon", userid);
                 }
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
@@ -380,6 +412,23 @@ public class MainActivity extends AppCompatActivity {
             });
         } catch (MqttException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void publish(String topic, String payload) {
+        if (client == null || !client.isConnected()) {
+            Log.e(TAG, "Client is not connected. Cannot publish message.");
+            return;
+        }
+        try {
+            MqttMessage message = new MqttMessage();
+            message.setPayload(payload.getBytes());
+            message.setQos(1); // Quality of Service: 0 (At most once), 1 (At least once), 2 (Exactly once)
+            message.setRetained(true); // Set to true if you want the message to be retained by the broker
+            client.publish(topic, message);
+            Log.d(TAG, "Message published to topic " + topic + ": " + payload);
+        } catch (MqttException e) {
+            Log.e(TAG, "Error publishing message to topic " + topic, e);
         }
     }
 
