@@ -1,5 +1,7 @@
 package com.example.iot2024;
 
+import android.graphics.Bitmap;
+
 public class Plant {
     private String name;
     private String species;
@@ -8,13 +10,15 @@ public class Plant {
     private String ip;
 
     private String mac;
+    private Bitmap bi;
 
-    public Plant(String name, String species, String imageUri, String ip, String mac) {
+    public Plant(String name, String species, String imageUri, String ip, String mac, Bitmap bi) {
         this.name = name;
         this.species = species;
         this.imageUri = imageUri;
         this.ip = ip;
         this.mac = mac;
+        this.bi = bi;
     }
 
     public String getName() {
@@ -32,5 +36,11 @@ public class Plant {
     public String getIp() {return ip;}
 
     public String getMac() {return mac;}
+
+    public Bitmap getBi() {return bi;}
+
+    public void setImageUri(String value) {
+        this.imageUri = value;
+    }
 }
 

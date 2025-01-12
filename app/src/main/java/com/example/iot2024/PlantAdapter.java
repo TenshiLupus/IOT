@@ -1,6 +1,11 @@
 package com.example.iot2024;
 
+import static androidx.core.app.ActivityCompat.startActivityForResult;
+
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
+import android.provider.MediaStore;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +22,10 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
 
     private List<Plant> plants;
     private OnViewMoreClickListener listener;
+    private Context context;
+
+    private static final int REQUEST_IMAGE_CAPTURE = 7;
+
 
     public interface OnViewMoreClickListener {
         void onViewMore(Plant plant);
@@ -30,6 +39,7 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     @NonNull
     @Override
     public PlantViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
+        context = parent.getContext();
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.plant_item, parent, false);
         return new PlantViewHolder(view);
     }
@@ -44,6 +54,8 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         if (plant.getImageUri() != null) {
             holder.imgPlant.setImageURI(Uri.parse(plant.getImageUri()));
         }
+
+        holder.imgPlant.setImageBitmap(plant.getBi());
 
         holder.btnViewMore.setOnClickListener(v -> listener.onViewMore(plant));
     }

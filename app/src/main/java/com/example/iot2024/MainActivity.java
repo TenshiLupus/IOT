@@ -87,6 +87,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView lv;
     private TextView tv;
     private ImageView qv;
+    private ImageView pv;
 
     private double longitude;
     private double latitude;
@@ -116,6 +117,8 @@ public class MainActivity extends AppCompatActivity {
 
     private String mac;
 
+    private Bitmap plantBitmap;
+
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
 
@@ -131,12 +134,23 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
+        if(acct!=null){
+            userid = acct.getId();
+            String personName = acct.getDisplayName();
+            String personEmail = acct.getEmail();
+            Log.d("ANGEL", personName);
+            Log.d("ANGEL", personEmail);
+
+        }
+
         Intent intent = getIntent();
 
         // Extract the string extra using the key
         hostname = intent.getStringExtra("deviceip");
         image= intent.getStringExtra("image");
         mac = intent.getStringExtra("mac");
+        plantBitmap = intent.getParcelableExtra("bitmap");
 
         GetGoogleIdOption googleIdOption  = new GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)
@@ -155,28 +169,23 @@ public class MainActivity extends AppCompatActivity {
         lv = findViewById(R.id.lumen_value);
         tv = findViewById(R.id.temp_value);
         qv = findViewById(R.id.info);
+        pv = findViewById(R.id.plantImage);
         Button switchButton = findViewById(R.id.chartButton);
 
+        pv.setImageBitmap(plantBitmap);
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         gsc = GoogleSignIn.getClient(this,gso);
 
 
 
-        GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
-        if(acct!=null){
-            userid = acct.getId();
-            String personName = acct.getDisplayName();
-            String personEmail = acct.getEmail();
-            Log.d("ANGEL", personName);
-            Log.d("ANGEL", personEmail);
-
-        }
 
         switchButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Create an Intent to start SecondActivity
                 Intent intent = new Intent(MainActivity.this, ChartActivity.class);
+                intent.putExtra("mac", mac);
+                intent.putExtra("gid",userid);
                 startActivity(intent);
             }
         });
@@ -443,20 +452,22 @@ public class MainActivity extends AppCompatActivity {
         executorService.execute(() -> {
             try {
 
-                byte[] imageBytes = convertDrawableToByteArray(this, R.drawable.plant_1);
+                //byte[] imageBytes = convertDrawableToByteArray(this, R.drawable.plant_1);
 
                 // Read the file as bytes
 
-                Log.d("ANGEL PLANT CONTENT", "IS THIS LOGGING?" + imageBytes.length);
+                //Log.d("ANGEL PLANT CONTENT", "IS THIS LOGGING?" + imageBytes.length);
                 // Encode to Base64
-                @SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(imageBytes);
+                //@SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(imageBytes);
 
+                String base64String = image;
                 Log.d("ANGEL PLANT", base64String);
 
                 OkHttpClient client = new OkHttpClient().newBuilder().build();
 
                 JSONObject json = new JSONObject();
                 JSONArray images = new JSONArray();
+
                 images.put("data:image/jpg;base64," + base64String);
                 json.put("images", images);
                 String jsonPayload = json.toString();
