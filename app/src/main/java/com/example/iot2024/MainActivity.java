@@ -274,13 +274,7 @@ public class MainActivity extends AppCompatActivity {
 
                     }
                     Log.d("ANGEL", "PASSED TOPIC READING");
-                /*
-                String weatherApiUrl = "https://api.tomorrow.io/v4/weather/forecast?location=42.3478,-71.0466&apikey=tIZjAylkQoHd5kF2mxZnAvJnxTyekszv";
-                fetchJson(weatherApiUrl);
-                JsonObject jsonObject = JsonParser.parseString(weather_api_response).getAsJsonObject();
-                JsonObject timelines = jsonObject.getAsJsonObject("timelines");
-                Log.d("ANGEL temp","" + timelines.getAsJsonObject("minutely"));
-                */
+
                 }catch (Exception e){
                     e.printStackTrace();
                 }
@@ -292,8 +286,8 @@ public class MainActivity extends AppCompatActivity {
         });
 
 
-        String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
-        fetchJson(weatherApiUrl);
+        // String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
+        //fetchWeather();
         fetchPlant();
 
 
@@ -330,17 +324,10 @@ public class MainActivity extends AppCompatActivity {
                         latitude = location.getLatitude();
                         longitude = location.getLongitude();
 
-                        //String weatherApiUrl = "https://api.tomorrow.io/v4/weather/forecast?location=" +latitude +","+longitude +"&apikey=tIZjAylkQoHd5kF2mxZnAvJnxTyekszv";
-
-                        //String weatherApiUrl = "https://api.tomorrow.io/v4/weather/forecast?location=42.3478,-71.0466&apikey=tIZjAylkQoHd5kF2mxZnAvJnxTyekszv";
-
-                        //System.out.println(weatherApiUrl);
-                        //fetchJson(weatherApiUrl);
-
-                        // Display location
-                        //Toast.makeText(this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_SHORT).show();
+                        fetchWeather();
                         deviceLocation =  latitude + ":" + longitude;
                         System.out.println("Lat: " + latitude + ", Lon: " + longitude);
+
                     } else {
                         Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show();
                     }
@@ -457,24 +444,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    private String getURLForResource (int resourceId) {
-        //use BuildConfig.APPLICATION_ID instead of R.class.getPackage().getName() if both are not same
-        return Uri.parse("android.resource://"+R.class.getPackage().getName()+"/" +resourceId).toString();
-    }
-
     private void fetchPlant() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         executorService.execute(() -> {
             try {
-
-                //byte[] imageBytes = convertDrawableToByteArray(this, R.drawable.plant_1);
-
-                // Read the file as bytes
-
-                //Log.d("ANGEL PLANT CONTENT", "IS THIS LOGGING?" + imageBytes.length);
-                // Encode to Base64
-                //@SuppressLint({"NewApi", "LocalSuppress"}) String base64String = Base64.getEncoder().encodeToString(imageBytes);
 
                 String base64String = image;
                 Log.d("ANGEL PLANT", base64String);
@@ -529,10 +503,6 @@ public class MainActivity extends AppCompatActivity {
                                 bottomSheetDialog.show(getSupportFragmentManager(), "Details");
                             });
 
-
-
-
-
                             System.out.println(description +"\n\n" + soil + "\n\n" + light + "\n\n" + watering + "\n\n");
 
 
@@ -550,13 +520,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
-    private void fetchJson(String urlString) {
+    private void fetchWeather() {
+        String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         executorService.execute(() -> {
             try {
                 // Create URL object
-                URL url = new URL(urlString);
+                URL url = new URL(weatherApiUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
                 connection.setRequestProperty("Accept", "application/json");

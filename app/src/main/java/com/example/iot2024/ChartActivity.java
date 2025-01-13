@@ -55,7 +55,7 @@ public class ChartActivity extends AppCompatActivity {
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                // Create an intent to navigate to MainActivity
+                // free resources and navigate to Plan overview
                 finish();
             }
         });
@@ -108,8 +108,6 @@ public class ChartActivity extends AppCompatActivity {
 
                 List<Entry> tempEntries = new ArrayList<>();
 
-
-                tempEntries.add(new Entry(3, 26f));
 
                 LineDataSet tempDataSet = new LineDataSet(tempEntries, "Temperature (°C)");
                 tempDataSet.setColor(Color.RED);

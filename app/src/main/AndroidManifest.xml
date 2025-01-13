@@ -41,9 +41,6 @@
             android:name=".MainActivity"
             android:exported="false" />
         <activity
-            android:name=".LineChartView"
-            android:exported="false" />
-        <activity
             android:name=".ChartActivity"
             android:exported="false" />
         <activity
