@@ -5,22 +5,38 @@
     android:orientation="vertical"
     android:padding="16dp">
 
+    <TextView
+        android:id="@+id/textView7"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Please fill:" />
+
     <EditText
         android:id="@+id/editPlantName"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Plant Name" />
+        android:hint="Plant Name"
+        android:minHeight="48dp" />
 
     <EditText
-        android:id="@+id/editPlantSpecies"
+        android:id="@+id/ipAddress"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:hint="Plant Species" />
+        android:hint="IP address"
+        android:minHeight="48dp" />
+
+    <EditText
+        android:id="@+id/macAddress"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="MAC address"
+        android:minHeight="48dp" />
 
     <Button
         android:id="@+id/btnComplete"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Complete"
-        android:layout_marginTop="16dp" />
+        android:layout_marginTop="16dp"
+        android:backgroundTint="#9D4F7569"
+        android:text="Complete" />
 </LinearLayout>

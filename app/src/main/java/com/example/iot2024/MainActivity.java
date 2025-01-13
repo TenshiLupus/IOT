@@ -88,9 +88,13 @@ public class MainActivity extends AppCompatActivity {
     private TextView tv;
     private ImageView qv;
     private ImageView pv;
+    private Button historyButton;
+    private Button backButton;
+
 
     private double longitude;
     private double latitude;
+
     private Switch lightToggle = null;
     private MqttAndroidClient client;
     //private static final String SERVER_URI = "tcp://broker.hivemq.com:1883";
@@ -108,7 +112,7 @@ public class MainActivity extends AppCompatActivity {
     private String light;
     private String watering;
     private String userid = "";
-
+    private String deviceLocation = "";
     private String hostname;
     private String username = "iot";
     private String password = "iot2024";
@@ -170,16 +174,26 @@ public class MainActivity extends AppCompatActivity {
         tv = findViewById(R.id.temp_value);
         qv = findViewById(R.id.info);
         pv = findViewById(R.id.plantImage);
-        Button switchButton = findViewById(R.id.chartButton);
+        historyButton = findViewById(R.id.chartButton);
+        backButton = findViewById(R.id.backButton);
+
 
         pv.setImageBitmap(plantBitmap);
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         gsc = GoogleSignIn.getClient(this,gso);
 
 
+        historyButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                // Create an Intent to start SecondActivity
+                Intent resultIntent = new Intent();
+                setResult(RESULT_OK, resultIntent);
+                finish();
+            }
+        });
 
-
-        switchButton.setOnClickListener(new View.OnClickListener() {
+        historyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Create an Intent to start SecondActivity
@@ -280,7 +294,7 @@ public class MainActivity extends AppCompatActivity {
 
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         fetchJson(weatherApiUrl);
-        //fetchPlant();
+        fetchPlant();
 
 
 
@@ -313,8 +327,8 @@ public class MainActivity extends AppCompatActivity {
                 .addOnSuccessListener(this, location -> {
                     if (location != null) {
                         // Get latitude and longitude
-                        double latitude = location.getLatitude();
-                        double longitude = location.getLongitude();
+                        latitude = location.getLatitude();
+                        longitude = location.getLongitude();
 
                         //String weatherApiUrl = "https://api.tomorrow.io/v4/weather/forecast?location=" +latitude +","+longitude +"&apikey=tIZjAylkQoHd5kF2mxZnAvJnxTyekszv";
 
@@ -324,7 +338,8 @@ public class MainActivity extends AppCompatActivity {
                         //fetchJson(weatherApiUrl);
 
                         // Display location
-                        Toast.makeText(this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_SHORT).show();
+                        //Toast.makeText(this, "Lat: " + latitude + ", Lon: " + longitude, Toast.LENGTH_SHORT).show();
+                        deviceLocation =  latitude + ":" + longitude;
                         System.out.println("Lat: " + latitude + ", Lon: " + longitude);
                     } else {
                         Toast.makeText(this, "Location not available", Toast.LENGTH_SHORT).show();
@@ -388,6 +403,7 @@ public class MainActivity extends AppCompatActivity {
                     Log.d(TAG, "onSuccess");
                     System.out.println(TAG + " Success. Connected to " + SERVER_URI);
                     publish("plinplon", userid);
+                    publish("location", deviceLocation);
                 }
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {

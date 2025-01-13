@@ -16,17 +16,22 @@ public class AddPlantActivity extends AppCompatActivity {
         setContentView(R.layout.activity_add_plant);
 
         EditText editPlantName = findViewById(R.id.editPlantName);
-        EditText editPlantSpecies = findViewById(R.id.editPlantSpecies);
+        EditText editMacAddress = findViewById(R.id.macAddress);
+        EditText editIpAddress = findViewById(R.id.ipAddress);
         Button btnComplete = findViewById(R.id.btnComplete);
 
         btnComplete.setOnClickListener(v -> {
             String name = editPlantName.getText().toString();
-            String species = editPlantSpecies.getText().toString();
+            String mac = editMacAddress.getText().toString();
+            String ip = editIpAddress.getText().toString();
 
-            if (!name.isEmpty() && !species.isEmpty()) {
+
+            if (!name.isEmpty() && !mac.isEmpty() && !ip.isEmpty()) {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("name", name);
-                resultIntent.putExtra("species", species);
+                resultIntent.putExtra("mac", mac);
+                resultIntent.putExtra("ip", ip);
+                resultIntent.putExtra("b64image", "");
                 setResult(RESULT_OK, resultIntent);
                 finish();
             } else {

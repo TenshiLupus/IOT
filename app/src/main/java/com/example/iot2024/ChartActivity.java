@@ -56,8 +56,7 @@ public class ChartActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 // Create an intent to navigate to MainActivity
-                Intent intent = new Intent(ChartActivity.this, MainActivity.class);
-                startActivity(intent); // Start the activity
+                finish();
             }
         });
 

@@ -34,7 +34,9 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAmount;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PlantListActivity extends AppCompatActivity {
 
@@ -44,6 +46,7 @@ public class PlantListActivity extends AppCompatActivity {
     private FirebaseDatabase database;
 
     private static final int REQUEST_IMAGE_CAPTURE = 7;
+    private static final int PLANT_OVERVIEW = 5;
 
     private Plant pressedPlant;
 
@@ -85,6 +88,7 @@ public class PlantListActivity extends AppCompatActivity {
                     String mac = ds.getKey();
                     String ip = "";
                     String image = "";
+                    String name = "";
                     Bitmap bi = null;
                     for(DataSnapshot properties : ds.getChildren()){
 
@@ -98,19 +102,23 @@ public class PlantListActivity extends AppCompatActivity {
                             case "ip":
                                 ip = properties.getValue(String.class);
                                 Log.d("ANGEL VALUES", ip);
+                                break;
+                            case "name":
+                                name = properties.getValue(String.class);
+                                Log.d("ANGEL VALUES", ip);
+                                break;
+
                         }
 
                     }
 
-                    plants.add(new Plant("Angel", "waw", image, ip, mac, bi));
-                    plants.add(new Plant("Default Plant", "Default Species", null, "", "na", bi));
+                    plants.add(new Plant(name,  image, ip, mac, bi));
 
-                    adapter.notifyDataSetChanged();
                     System.out.println(plants);
 
                 }
 
-
+                adapter.notifyDataSetChanged();
             }
 
             @Override
@@ -148,13 +156,12 @@ public class PlantListActivity extends AppCompatActivity {
             if(!pressedPlant.getImageUri().isEmpty()){
                 Intent intent = new Intent(PlantListActivity.this, MainActivity.class);
                 intent.putExtra("plantName", plant.getName());
-                intent.putExtra("plantSpecies", plant.getSpecies());
                 intent.putExtra("deviceip", plant.getIp());
                 intent.putExtra("image", plant.getImageUri());
                 intent.putExtra("mac", plant.getMac());
                 intent.putExtra("bitmap", plant.getBi());
                 Log.d("Angel", "STARTED OVERVIEW INTENT");
-                startActivity(intent);
+                startActivityForResult(intent, PLANT_OVERVIEW);
             }
 
         });
@@ -173,14 +180,30 @@ public class PlantListActivity extends AppCompatActivity {
 
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             String name = data.getStringExtra("name");
-            String species = data.getStringExtra("species");
-            String imageUri = data.getStringExtra("imageUri");
+            String b64image = data.getStringExtra("b64image");
             String ip = data.getStringExtra("ip");
             String mac = data.getStringExtra("mac");
 
-            if (name != null && species != null) {
-                plants.add(new Plant(name, species, imageUri, ip, mac, null));
+            if (name != null && b64image != null && ip != null && mac != null) {
+                Plant createdPlant = new Plant(name, b64image, ip, mac, null);
+                plants.add(createdPlant);
                 adapter.notifyDataSetChanged();  // Uppdatera RecyclerView
+
+                Map<String, Object> updates = new HashMap<>();
+                updates.put("name", name);
+                updates.put("image", b64image);
+                updates.put("ip", ip);
+                updates.put("mac", mac);
+                updates.put("logs", null);
+
+                // Update the child node with multiple values
+                user.child(createdPlant.getMac()).updateChildren(updates)
+                        .addOnSuccessListener(aVoid -> {
+                            Log.d("ANGEL", "PLANT IMAGE UPDATED IN FIREBASE");
+                        })
+                        .addOnFailureListener(e -> {
+                            System.err.println("Failed to update data: " + e.getMessage());
+                        });
             } else {
                 Toast.makeText(this, "Invalid data", Toast.LENGTH_SHORT).show();
             }
@@ -194,6 +217,8 @@ public class PlantListActivity extends AppCompatActivity {
             // Convert Bitmap to Base64
             String base64String = bitmapToBase64(imageBitmap);
             pressedPlant.setImageUri(base64String);
+            pressedPlant.setImageBitmap(imageBitmap);
+            adapter.notifyDataSetChanged();
             user.child(pressedPlant.getMac()).child("image").setValue(base64String).addOnSuccessListener(e -> {
                 Log.d("ANGEL", "PLANT IMAGE UPDATED IN FIREBASE");
             });

@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.Toast;
 
@@ -20,7 +21,7 @@ public class Login extends AppCompatActivity {
 
     GoogleSignInOptions gso;
     GoogleSignInClient gsc;
-    ImageView googleBtn;
+    Button googleBtn;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {

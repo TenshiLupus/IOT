@@ -1,47 +1,70 @@
 <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="wrap_content"
     android:layout_margin="8dp">
 
-    <LinearLayout
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:id="@+id/linearLayout2"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:padding="16dp">
+        android:layout_height="100dp"
+        app:layout_constraintEnd_toEndOf="@+id/txtPlantSpecies"
+        app:layout_constraintStart_toEndOf="@+id/txtPlantSpecies">
+
 
         <ImageView
             android:id="@+id/imgPlant"
-            android:layout_width="64dp"
-            android:layout_height="64dp"
-            android:scaleType="centerCrop" />
+            android:layout_width="63dp"
+            android:layout_height="66dp"
+            android:layout_marginStart="16dp"
+            android:layout_marginTop="16dp"
+            android:layout_marginEnd="16dp"
+            android:layout_marginBottom="18dp"
+            android:scaleType="centerCrop"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/constraintLayout"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
 
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:id="@+id/constraintLayout"
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:layout_weight="1"
-            android:paddingStart="16dp">
+            android:layout_marginTop="17dp"
+            android:layout_marginEnd="68dp"
+            android:layout_marginBottom="22dp"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toStartOf="@+id/btnViewMore"
+            app:layout_constraintTop_toTopOf="parent">
 
             <TextView
                 android:id="@+id/txtPlantName"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="Plant Name"
+                android:textSize="16sp"
                 android:textStyle="bold"
-                android:textSize="16sp" />
 
-            <TextView
-                android:id="@+id/txtPlantSpecies"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="Plant Species" />
-        </LinearLayout>
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent" />
+
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
 
         <Button
             android:id="@+id/btnViewMore"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:text="View More" />
-    </LinearLayout>
+            android:layout_marginTop="23dp"
+            android:layout_marginEnd="26dp"
+            android:layout_marginBottom="29dp"
+            android:backgroundTint="#9D4F7569"
+            android:text="View Plant"
+            app:layout_constraintBottom_toBottomOf="parent"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </androidx.cardview.widget.CardView>

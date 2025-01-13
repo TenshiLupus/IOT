@@ -49,7 +49,6 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         Plant plant = plants.get(position);
 
         holder.txtPlantName.setText(plant.getName());
-        holder.txtPlantSpecies.setText(plant.getSpecies());
 
         if (plant.getImageUri() != null) {
             holder.imgPlant.setImageURI(Uri.parse(plant.getImageUri()));
@@ -68,14 +67,12 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     static class PlantViewHolder extends RecyclerView.ViewHolder {
         ImageView imgPlant;
         TextView txtPlantName;
-        TextView txtPlantSpecies;
         Button btnViewMore;
 
         public PlantViewHolder(@NonNull View itemView) {
             super(itemView);
             imgPlant = itemView.findViewById(R.id.imgPlant);
             txtPlantName = itemView.findViewById(R.id.txtPlantName);
-            txtPlantSpecies = itemView.findViewById(R.id.txtPlantSpecies);
             btnViewMore = itemView.findViewById(R.id.btnViewMore);
         }
     }

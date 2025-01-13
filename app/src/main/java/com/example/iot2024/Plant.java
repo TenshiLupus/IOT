@@ -12,9 +12,8 @@ public class Plant {
     private String mac;
     private Bitmap bi;
 
-    public Plant(String name, String species, String imageUri, String ip, String mac, Bitmap bi) {
+    public Plant(String name, String imageUri, String ip, String mac, Bitmap bi) {
         this.name = name;
-        this.species = species;
         this.imageUri = imageUri;
         this.ip = ip;
         this.mac = mac;
@@ -25,9 +24,6 @@ public class Plant {
         return name;
     }
 
-    public String getSpecies() {
-        return species;
-    }
 
     public String getImageUri() {
         return imageUri;
@@ -39,8 +35,12 @@ public class Plant {
 
     public Bitmap getBi() {return bi;}
 
+    public void setName(String value) {this.name = value;}
+
     public void setImageUri(String value) {
         this.imageUri = value;
     }
+
+    public void setImageBitmap(Bitmap value) {this.bi = value;}
 }
 
