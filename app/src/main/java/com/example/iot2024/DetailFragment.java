@@ -12,12 +12,8 @@ import androidx.annotation.Nullable;
 import com.google.android.material.bottomsheet.BottomSheetDialogFragment;
 
 public class DetailFragment extends BottomSheetDialogFragment {
-    private TextView description;
-    private TextView soil;
-    private TextView light;
-    private TextView watering;
 
-
+    //Shall use the data passed in from main activity to insert the text on their respective spots
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
@@ -48,23 +44,6 @@ public class DetailFragment extends BottomSheetDialogFragment {
         super.onViewCreated(view, savedInstanceState);
 
 
-    }
-
-    public void updateText(String textRow, String newText) {
-        switch (textRow){
-            case "description":
-                description.setText(newText);
-                break;
-            case "soil":
-                soil.setText(newText);
-                break;
-            case "light":
-                light.setText(newText);
-                break;
-            case "watering":
-                watering.setText(newText);
-                break;
-        }
     }
 
 

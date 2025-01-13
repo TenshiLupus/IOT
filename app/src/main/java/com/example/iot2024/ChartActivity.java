@@ -49,9 +49,9 @@ public class ChartActivity extends AppCompatActivity {
         // Initialize views
         temperatureChart = findViewById(R.id.temperatureChart);
         moistureLumenChart = findViewById(R.id.moistureLumenChart);
-        navigateButton = findViewById(R.id.button); // Initialize the button
+        navigateButton = findViewById(R.id.button);
 
-        // Set button click listener
+        //Once the users wants to go back to the mainctivity this is run
         navigateButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -60,6 +60,7 @@ public class ChartActivity extends AppCompatActivity {
             }
         });
 
+        //Shall access firebase with the retrieved data sent int from the main activity
         Intent intent = getIntent();
         String mac = intent.getStringExtra("mac");
         String userid = intent.getStringExtra("gid");
@@ -67,11 +68,11 @@ public class ChartActivity extends AppCompatActivity {
         DatabaseReference myRef = database.getReference();
         DatabaseReference rpi =  myRef.child(userid).child(mac).child("logs");
 
-        // Read data
+        //Shall obtain all the logged records within the previous hours from now and render it to the screen
         rpi.addValueEventListener(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                // Get the value
+
 
                 DateTimeFormatter sdf = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
                 lastHour = new ArrayList<>();
@@ -79,7 +80,7 @@ public class ChartActivity extends AppCompatActivity {
                 TemporalAmount ta = Duration.ofMinutes(60);
                 LocalDateTime ld = dn.minus(ta);
 
-
+                //Obtains all the records in the previous hour
                 for(DataSnapshot ds : dataSnapshot.getChildren()){
                     String d = ds.getKey();
                     System.out.println("DATE LOG: " + d);
@@ -90,10 +91,10 @@ public class ChartActivity extends AppCompatActivity {
                         System.out.println("ITEM HAS BEEN ADDED TO THE LIST");
                     }
 
-                    //String value = dataSnapshot.getValue(String.class);
-                    //System.out.println("Value is: " + value);
                 }
                 System.out.println(lastHour);
+
+                //shall the retrieved the property values from the record
                 for(DataSnapshot ds : lastHour){
                     String d = ds.getKey();
                     Object moistureobj = ds.child("moisture").getValue();
@@ -106,9 +107,8 @@ public class ChartActivity extends AppCompatActivity {
                     System.out.println("Light property" + light);
                 }
 
+                //Time constraint, consider deleting
                 List<Entry> tempEntries = new ArrayList<>();
-
-
                 LineDataSet tempDataSet = new LineDataSet(tempEntries, "Temperature (°C)");
                 tempDataSet.setColor(Color.RED);
 
@@ -116,6 +116,7 @@ public class ChartActivity extends AppCompatActivity {
                 temperatureChart.setData(tempLineData);
                 temperatureChart.invalidate();
 
+                //For all the records within the previous hour
                 Log.d("Angel", "FORMATTING DATA");
                 try {
 
@@ -136,6 +137,7 @@ public class ChartActivity extends AppCompatActivity {
 
                     }
 
+                    //Shall create the lines between the data points of their respective property
                     Log.d("Angel", "Settings values to chart");
                     LineDataSet moistureDataSet = new LineDataSet(moistureEntries, "Moisture (%)");
                     moistureDataSet.setColor(Color.BLUE);
@@ -163,6 +165,7 @@ public class ChartActivity extends AppCompatActivity {
         description.setText("Levels");
         description.setPosition(150f, 15f);
 
+        //Allocates 60 slots for the amount of minutes in an hour
         List<String> numbers = new ArrayList<>();
         for (int i = 0; i < 60; i++) {
             numbers.add(String.valueOf(i));

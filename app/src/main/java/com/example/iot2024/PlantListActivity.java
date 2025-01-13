@@ -57,28 +57,27 @@ public class PlantListActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_plant_list);
 
+        //Request the user for camera permission to associate camera images with certain plants
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA) != PackageManager.PERMISSION_GRANTED){
             ActivityCompat.requestPermissions(this,new String[]{Manifest.permission.CAMERA}, 10);
         }
 
+        //Retrieves the last signed in user
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         String userid = "";
         if(acct!=null){
             userid = acct.getId();
-            String personName = acct.getDisplayName();
-            String personEmail = acct.getEmail();
-            Log.d("ANGEL", personName);
-            Log.d("ANGEL", personEmail);
-
         }
 
+        //Obtains a direct link to the associated database for this application
         database = FirebaseDatabase.getInstance();
         DatabaseReference myRef = database.getReference();
 
+        //User is now the root to access all the documents and records stored under it
         user =  myRef.child(userid);
-        ArrayList<DataSnapshot> devices = new ArrayList<>();
 
-        // Read data
+
+        //Retrieves the data associated with each device
         user.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -117,7 +116,7 @@ public class PlantListActivity extends AppCompatActivity {
                     System.out.println(plants);
 
                 }
-
+                //once any modifications have been made to the list, update the view to reflect the updated plants
                 adapter.notifyDataSetChanged();
             }
 
@@ -128,17 +127,20 @@ public class PlantListActivity extends AppCompatActivity {
             }
         });
 
-        // Lägg till en standardplanta
-        //plants.add(new Plant("Default Plant", "Default Species", null, ""));
 
         System.out.println(plants);
         RecyclerView recyclerView = findViewById(R.id.recyclerView);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
+
+        //Send the callbacks to the adapter that will be triggered once the user interacts with the button for each plant view
         adapter = new PlantAdapter(plants, plant -> {
             // Navigera till MainActivity
             pressedPlant = plant;
+
             Log.d("Angel", "PLANT IMAGE STATUS: " + pressedPlant.getImageUri());
             Log.d("ANGEL", "PLANT EMPTY STATUS: " + pressedPlant.getImageUri().isEmpty());
+
+            //Shall insert a new image for the plant if it did not have one already
             if(plant.getImageUri().isEmpty()){
                 Log.d("Angel", "Starting camera");
                 try {
@@ -153,6 +155,7 @@ public class PlantListActivity extends AppCompatActivity {
                     e.printStackTrace();
                 }
             }
+            //Once all relevant values are prepared head over to the respective plant overview
             if(!pressedPlant.getImageUri().isEmpty()){
                 Intent intent = new Intent(PlantListActivity.this, MainActivity.class);
                 intent.putExtra("plantName", plant.getName());
@@ -167,6 +170,7 @@ public class PlantListActivity extends AppCompatActivity {
         });
         recyclerView.setAdapter(adapter);
 
+        //Button that will trigger the insertion of a new plant in a new activity
         FloatingActionButton fabAddPlant = findViewById(R.id.fabAddPlant);
         fabAddPlant.setOnClickListener(v -> {
             Intent intent = new Intent(PlantListActivity.this, AddPlantActivity.class);
@@ -174,10 +178,12 @@ public class PlantListActivity extends AppCompatActivity {
         });
     }
 
+    //Overrided function where in data returning from their respective activites will be handled
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
+        //Will create a new plant in the list and persist this new plant in firebase
         if (requestCode == 1 && resultCode == RESULT_OK && data != null) {
             String name = data.getStringExtra("name");
             String b64image = data.getStringExtra("b64image");
@@ -187,8 +193,9 @@ public class PlantListActivity extends AppCompatActivity {
             if (name != null && b64image != null && ip != null && mac != null) {
                 Plant createdPlant = new Plant(name, b64image, ip, mac, null);
                 plants.add(createdPlant);
-                adapter.notifyDataSetChanged();  // Uppdatera RecyclerView
+                adapter.notifyDataSetChanged();
 
+                //Shall initiate the properties for this plant in firebase
                 Map<String, Object> updates = new HashMap<>();
                 updates.put("name", name);
                 updates.put("image", b64image);
@@ -209,15 +216,18 @@ public class PlantListActivity extends AppCompatActivity {
             }
         }
 
+        //Handles data retrieved from the camera intent
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
             // Retrieve the Bitmap from the Intent
             Bundle extras = data.getExtras();
             Bitmap imageBitmap = (Bitmap) extras.get("data");
             Log.d("ANGEL", "GOT BACK DATA FROM CAMERA INTENT");
+
             // Convert Bitmap to Base64
             String base64String = bitmapToBase64(imageBitmap);
             pressedPlant.setImageUri(base64String);
             pressedPlant.setImageBitmap(imageBitmap);
+
             adapter.notifyDataSetChanged();
             user.child(pressedPlant.getMac()).child("image").setValue(base64String).addOnSuccessListener(e -> {
                 Log.d("ANGEL", "PLANT IMAGE UPDATED IN FIREBASE");
@@ -228,6 +238,7 @@ public class PlantListActivity extends AppCompatActivity {
 
     }
 
+    //Will convert a bitmap to a bse64 string
     private String bitmapToBase64(Bitmap bitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         bitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
@@ -235,11 +246,11 @@ public class PlantListActivity extends AppCompatActivity {
         return Base64.encodeToString(byteArray, Base64.DEFAULT);
     }
 
+    //Will convert an iamge from a base 64 basck to a bitmap for rendering on the interface
     private Bitmap base64ToBitmap(String base64String) {
         // Decode Base64 string into a byte array
         byte[] decodedBytes = Base64.decode(base64String, Base64.DEFAULT);
 
-        // Convert the byte array into a Bitmap
         return BitmapFactory.decodeByteArray(decodedBytes, 0, decodedBytes.length);
     }
 }

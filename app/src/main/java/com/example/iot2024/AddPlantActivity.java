@@ -15,17 +15,19 @@ public class AddPlantActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_add_plant);
 
+        //Assigns the view components for data retrieval
         EditText editPlantName = findViewById(R.id.editPlantName);
         EditText editMacAddress = findViewById(R.id.macAddress);
         EditText editIpAddress = findViewById(R.id.ipAddress);
         Button btnComplete = findViewById(R.id.btnComplete);
 
+        //Shall send the user back to the Plant list view once all textfields fields have been filled with content
         btnComplete.setOnClickListener(v -> {
             String name = editPlantName.getText().toString();
-            String mac = editMacAddress.getText().toString();
-            String ip = editIpAddress.getText().toString();
+            String mac = editMacAddress.getText().toString().strip();
+            String ip = editIpAddress.getText().toString().strip();
 
-
+            //puts the written text in the intent for later retrieval in the plant list view
             if (!name.isEmpty() && !mac.isEmpty() && !ip.isEmpty()) {
                 Intent resultIntent = new Intent();
                 resultIntent.putExtra("name", name);

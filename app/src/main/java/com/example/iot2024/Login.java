@@ -28,12 +28,14 @@ public class Login extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.login);
 
+        //Shall log the user to and use its id to locate its documents in firebase
         Log.d("ANGEL", "INITIATED LOGIN");
         googleBtn = findViewById(R.id.google_btn);
 
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         gsc = GoogleSignIn.getClient(this,gso);
 
+        //Shall send the user to the list of plants tethered to this user
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if(acct!=null){
             navigateToSecondActivity();
@@ -41,6 +43,7 @@ public class Login extends AppCompatActivity {
 
         Log.d("ANGEL", "PASSED GOOGLE INITIATIONS");
 
+        //trigger the google singing
         googleBtn.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -52,11 +55,12 @@ public class Login extends AppCompatActivity {
 
     }
 
-    void signIn(){
+    private void signIn(){
         Intent signInIntent = gsc.getSignInIntent();
         startActivityForResult(signInIntent,1000);
     }
 
+    //Evaluate the result from the activity and send the user forward if successful
     @Override
     protected void onActivityResult(int requestCode, int resultCode,Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -73,7 +77,7 @@ public class Login extends AppCompatActivity {
         }
 
     }
-    void navigateToSecondActivity(){
+    private void navigateToSecondActivity(){
         finish();
         Intent intent = new Intent(Login.this, PlantListActivity.class);
         startActivity(intent);

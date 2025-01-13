@@ -138,36 +138,36 @@ public class MainActivity extends AppCompatActivity {
             return insets;
         });
 
+        //Retrieve the signed in user in the device
         GoogleSignInAccount acct = GoogleSignIn.getLastSignedInAccount(this);
         if(acct!=null){
             userid = acct.getId();
-            String personName = acct.getDisplayName();
-            String personEmail = acct.getEmail();
-            Log.d("ANGEL", personName);
-            Log.d("ANGEL", personEmail);
-
         }
 
+        //Shall extract the data associated with this plant
         Intent intent = getIntent();
-
-        // Extract the string extra using the key
         hostname = intent.getStringExtra("deviceip");
         image= intent.getStringExtra("image");
         mac = intent.getStringExtra("mac");
         plantBitmap = intent.getParcelableExtra("bitmap");
+
 
         GetGoogleIdOption googleIdOption  = new GetGoogleIdOption.Builder()
                 .setFilterByAuthorizedAccounts(true)
                 .setServerClientId(WEB_CLIENT_ID)
                 .setAutoSelectEnabled(true).build();
 
+        //Shall start the location service to obtain the coordinates of the device
         fusedLocationProviderClient = LocationServices.getFusedLocationProviderClient(this);
         Log.d("ANGEL LOCATION","" + fusedLocationProviderClient);
         requestLocationPermission();
         getLastKnownLocation();
+
+        //Shall connect the application to the mqtt broker and publsh some topics accessible to all connected devices in the network
         connect();
 
 
+        //Initiates the views
         lightToggle = findViewById(R.id.values_button);
         mv = findViewById(R.id.moisture_value);
         lv = findViewById(R.id.lumen_value);
@@ -178,12 +178,15 @@ public class MainActivity extends AppCompatActivity {
         backButton = findViewById(R.id.backButton);
 
 
+        //Sets the passed image bitmap to render it on the interface
         pv.setImageBitmap(plantBitmap);
+
         gso = new GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN).requestEmail().build();
         gsc = GoogleSignIn.getClient(this,gso);
 
 
-        historyButton.setOnClickListener(new View.OnClickListener() {
+        //Goes back to the plant list after being finished
+        backButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 // Create an Intent to start SecondActivity
@@ -193,6 +196,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Sends the user to the chart Activity
         historyButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -204,6 +208,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        //Activates the Lamp actuator over ssh
         lightToggle.setOnCheckedChangeListener(
                 new CompoundButton.OnCheckedChangeListener() {
                     @SuppressLint("StaticFieldLeak")
@@ -226,6 +231,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                 });
 
+        //Subscribe to topics in mqtt based on the Mac associated to the plant
         client.setCallback(new MqttCallbackExtended() {
             @Override
             public void connectComplete(boolean reconnect, String serverURI) {
@@ -246,24 +252,30 @@ public class MainActivity extends AppCompatActivity {
             public void connectionLost(Throwable cause) {
                 System.out.println("The Connection was lost.");
             }
+            //Updates the UI based on the updates to the topic the application is subscribed to
             @Override
             public void messageArrived(String topic, MqttMessage message) throws Exception {
                 String newMessage = new String(message.getPayload());
                 Log.d("ANGEL","Incoming message: " + newMessage + " Topic: " + topic);
+                //Cut the mac portion of the topic for switch evaluation
                 topic = topic.substring(mac.length() + 1);
                 Log.d("ANGEL", "TOPIC VALUE RECIEVED" + topic);
+
                 Log.d("ANGEL", "EVALUATING TOPIC VALUES");
                 try {
+
 
                     switch (topic) {
                         case "luxv":
                             double value = Double.parseDouble(newMessage);
                             Log.d("ANGEL", "EVALUATING LUXV");
+                            //if the registered light level falls under 15% turn on the lamp
                             if (value < 15.0) {
                                 Log.d("ANGEL", "TURNING ON LIGHT");
                                 run("tdtool --on 1");
                             } else run("tdtool --off 1");
 
+                            //Cut tailing decimals to avoid interface clutter
                             lv.setText(String.format("%.2f" + " %", value));
 
                             break;
@@ -285,9 +297,7 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
-
-        // String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=42.3478&lon=-71.0466&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
-        //fetchWeather();
+        //Lastly fetch the information about this particular plant
         fetchPlant();
 
 
@@ -295,6 +305,7 @@ public class MainActivity extends AppCompatActivity {
 
     }
 
+    //Shall request location permissions for the user
     private void requestLocationPermission() {
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             Log.d("ANGEL PERMISSION", "Permission not in package");
@@ -302,6 +313,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Evaluated result from the user input on location permission
     @Override
     public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
         super.onRequestPermissionsResult(requestCode, permissions, grantResults);
@@ -315,6 +327,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Shall get the location of the device for later usage
     @SuppressLint("MissingPermission")
     private void getLastKnownLocation() {
         fusedLocationProviderClient.getLastLocation()
@@ -338,9 +351,12 @@ public class MainActivity extends AppCompatActivity {
                 });
     }
 
-    public void run (String command) {
+    //shall Execute the passed in command that the user may require to run over ssh on the raspberry pi
+    private void run (String command) {
         Log.d("Angel", "RUNNING SSH COMMAND");
         Log.d("Angel", "NAME OF HOST: " + hostname);
+
+        //hard coded values that we expect users to have setup on the raspberry pies, unless there is a default user on the raspberry that would allow shh without a password
         String username = "iot";
         String password = "iot2024";
         try
@@ -377,6 +393,7 @@ public class MainActivity extends AppCompatActivity {
             System.exit(2); }
     }
 
+    //Shall connect the application with mqtt
     private void connect(){
         String clientId = MqttClient.generateClientId();
         client = new MqttAndroidClient(this.getApplicationContext(), SERVER_URI, clientId);
@@ -404,6 +421,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //helper function to subscribe to a topic
     private void subscribe(String topicToSubscribe) {
         final String topic = topicToSubscribe;
         int qos = 1;
@@ -418,8 +436,7 @@ public class MainActivity extends AppCompatActivity {
                 @Override
                 public void onFailure(IMqttToken asyncActionToken, Throwable exception) {
                     System.out.println("Failed to subscribe to topic: " + topic);
-// The subscription could not be performed, maybe the user was not
-// authorized to subscribe on the specified topic e.g. using wildcards
+
                 }
             });
         } catch (MqttException e) {
@@ -427,6 +444,7 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Helper function to publish a topic to the mqtt broker
     private void publish(String topic, String payload) {
         if (client == null || !client.isConnected()) {
             Log.e(TAG, "Client is not connected. Cannot publish message.");
@@ -435,8 +453,8 @@ public class MainActivity extends AppCompatActivity {
         try {
             MqttMessage message = new MqttMessage();
             message.setPayload(payload.getBytes());
-            message.setQos(1); // Quality of Service: 0 (At most once), 1 (At least once), 2 (Exactly once)
-            message.setRetained(true); // Set to true if you want the message to be retained by the broker
+            message.setQos(1);
+            message.setRetained(true); // Tell the broker to retain the topic
             client.publish(topic, message);
             Log.d(TAG, "Message published to topic " + topic + ": " + payload);
         } catch (MqttException e) {
@@ -444,9 +462,11 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
+    //Shall utilize the associated base64 image string to send the data to the plant registry api and obtain descriptions that fits the image
     private void fetchPlant() {
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
+        //Shall format the data according to the api requirements and a response with data corresponding to the plant
         executorService.execute(() -> {
             try {
 
@@ -476,6 +496,7 @@ public class MainActivity extends AppCompatActivity {
                     runOnUiThread(() -> {
                         JsonObject jsonObject = null;
                         try {
+                            //Format the response to JSON to access deeply nested properties
                             Log.d("ANGEL", "PARSING RESPONSE");
                             jsonObject = JsonParser.parseString(plantidResponse).getAsJsonObject();
                             Log.d("ANGEL", "PARSED OBJECT FROM PLANT RESPONSE");
@@ -490,8 +511,11 @@ public class MainActivity extends AppCompatActivity {
                             light = plantDetails.get("best_soil_type").getAsString();
                             watering = plantDetails.get("best_watering").getAsString();
 
+
+                            //Initiate fragment that will display the plant information to the user
                             DetailFragment bottomSheetDialog = new DetailFragment();
 
+                            //Since it is being passed to a fragment, the data needs to be inserted into a bundle
                             Bundle args = new Bundle();
                             args.putString("description", description);
                             args.putString("soil", soil);
@@ -520,13 +544,14 @@ public class MainActivity extends AppCompatActivity {
         });
     }
 
+    //Shall obtain temperature data from a public api utilizing the previosuly obtained location from the device and help it retrieve data relative to the location of the user
     private void fetchWeather() {
         String weatherApiUrl = "https://api.openweathermap.org/data/2.5/weather?lat=" + latitude + "&lon=" + longitude + "&units=metric&appid=ee2f79f1eea97bc6f758346e8a0856cb";
         ExecutorService executorService = Executors.newSingleThreadExecutor();
 
         executorService.execute(() -> {
             try {
-                // Create URL object
+                // Creates a request to the api and retrieves the data from the reponse
                 URL url = new URL(weatherApiUrl);
                 HttpURLConnection connection = (HttpURLConnection) url.openConnection();
                 connection.setRequestMethod("GET");
@@ -535,6 +560,7 @@ public class MainActivity extends AppCompatActivity {
                 // Check response code
                 int responseCode = connection.getResponseCode();
 
+                //parses the response till there is nothing to read
                 if (responseCode == HttpURLConnection.HTTP_OK) {
                     BufferedReader reader = new BufferedReader(new InputStreamReader(connection.getInputStream()));
                     StringBuilder response = new StringBuilder();
@@ -552,7 +578,7 @@ public class MainActivity extends AppCompatActivity {
 
 
 
-                    // Optionally update UI
+                    // Updates the ui with the retrieved data from the openweather API
                     runOnUiThread(() -> {
                         JsonObject jsonObject = JsonParser.parseString(weather_api_response).getAsJsonObject();
 
@@ -567,20 +593,6 @@ public class MainActivity extends AppCompatActivity {
                 Log.e(TAG, "Error fetching JSON", e);
             }
         });
-    }
-
-    private byte[] convertDrawableToByteArray(Context context, int drawableId) {
-        // Load the image as a Bitmap
-        Bitmap bitmap = BitmapFactory.decodeResource(context.getResources(), drawableId);
-
-        // Create a ByteArrayOutputStream
-        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
-
-        // Compress the Bitmap into the ByteArrayOutputStream (e.g., PNG format)
-        bitmap.compress(Bitmap.CompressFormat.JPEG, 100, byteArrayOutputStream);
-
-        // Convert the ByteArrayOutputStream into a byte array
-        return byteArrayOutputStream.toByteArray();
     }
 
 

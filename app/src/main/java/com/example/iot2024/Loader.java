@@ -14,17 +14,16 @@ import androidx.core.view.WindowInsetsCompat;
 
 public class Loader extends AppCompatActivity {
 
-    private Button ib;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
         EdgeToEdge.enable(this);
         setContentView(R.layout.activity_loader);
+        Button ib = findViewById(R.id.startButton);
 
-
-        ib = findViewById(R.id.startButton);
-
+        //First button that will be displayed to the user
         ib.setOnClickListener(e -> {
             Intent intent = new Intent(Loader.this, Login.class);
             startActivity(intent);

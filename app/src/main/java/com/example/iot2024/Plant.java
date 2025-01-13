@@ -12,6 +12,7 @@ public class Plant {
     private String mac;
     private Bitmap bi;
 
+    //Class that represents a plants with its typical getters and setters for the relevant properties
     public Plant(String name, String imageUri, String ip, String mac, Bitmap bi) {
         this.name = name;
         this.imageUri = imageUri;

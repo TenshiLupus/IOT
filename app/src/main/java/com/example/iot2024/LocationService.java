@@ -23,6 +23,7 @@ import com.google.android.gms.location.LocationRequest;
 import com.google.android.gms.location.LocationResult;
 import com.google.android.gms.location.LocationServices;
 
+//
 public class LocationService extends Service {
 
     private static final int LOCATION_SERVICE_ID = 175;
@@ -31,7 +32,10 @@ public class LocationService extends Service {
 
     private double longitude = 0;
     private double latitude = 0;
+
+    //Shall return the location of the device
     private final LocationCallback locationCallback = new LocationCallback() {
+        //
         @Override
         public void onLocationResult(LocationResult locationResult) {
             super.onLocationResult(locationResult);
@@ -58,21 +62,26 @@ public class LocationService extends Service {
         locationRequest.setFastestInterval(2000);
         locationRequest.setPriority(LocationRequest.PRIORITY_HIGH_ACCURACY);
 
+        //Avoids application crashing if permissions were not granted
         if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED &&
                 ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             return;
         }
 
+        //Starts providing data according to the settings provided to the client
         LocationServices.getFusedLocationProviderClient(this).requestLocationUpdates(locationRequest, locationCallback, Looper.getMainLooper());
 
     }
 
+    //Stops the service from running
     private void stopLocationService() {
         LocationServices.getFusedLocationProviderClient(this).removeLocationUpdates(locationCallback);
         stopForeground(true);
         stopSelf();
     }
 
+
+    //Main entry points for the service
     @Override
     public int onStartCommand(@Nullable Intent intent, int flags, int startId) {
         if (intent != null) {

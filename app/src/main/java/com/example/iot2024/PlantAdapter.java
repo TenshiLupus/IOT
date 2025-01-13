@@ -18,11 +18,12 @@ import androidx.recyclerview.widget.RecyclerView;
 
 import java.util.List;
 
+
+//Adapter that inflates the plant list with the retrieved plants persisted in firesbase
 public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHolder> {
 
     private List<Plant> plants;
     private OnViewMoreClickListener listener;
-    private Context context;
 
     private static final int REQUEST_IMAGE_CAPTURE = 7;
 
@@ -39,11 +40,11 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
     @NonNull
     @Override
     public PlantViewHolder onCreateViewHolder(@NonNull ViewGroup parent, int viewType) {
-        context = parent.getContext();
         View view = LayoutInflater.from(parent.getContext()).inflate(R.layout.plant_item, parent, false);
         return new PlantViewHolder(view);
     }
 
+    //Populate the list item with the relevant data
     @Override
     public void onBindViewHolder(@NonNull PlantViewHolder holder, int position) {
         Plant plant = plants.get(position);
@@ -64,6 +65,7 @@ public class PlantAdapter extends RecyclerView.Adapter<PlantAdapter.PlantViewHol
         return plants.size();
     }
 
+    //Initiates the view of the plant item
     static class PlantViewHolder extends RecyclerView.ViewHolder {
         ImageView imgPlant;
         TextView txtPlantName;
